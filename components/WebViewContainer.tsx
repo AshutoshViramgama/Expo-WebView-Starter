@@ -35,8 +35,6 @@ import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTyp
 import appConfig from '../config/app.config';
 import { trackPageView } from '../services/analytics';
 import { isDomainAllowed, isSystemScheme, ensureHttps } from '../utils/urlUtils';
-import ErrorScreen from './ErrorScreen';
-import LoadingIndicator from './LoadingIndicator';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -53,80 +51,18 @@ export interface WebViewContainerProps {
 
 const WebViewContainer = React.forwardRef<WebView | null, WebViewContainerProps>(
   ({ initialUrl, onUrlChange, onCanGoBackChange }, ref) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [hasError, setHasError] = useState(false);
-    const [errorDescription, setErrorDescription] = useState<string | undefined>(undefined);
     const [refreshing, setRefreshing] = useState(false);
     const [currentUrl, setCurrentUrl] = useState(initialUrl);
-
-    // Track the load-timeout timer so we can cancel it on successful load
-    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Internal ref used when no external ref is provided
     const internalRef = useRef<WebView | null>(null);
     const webViewRef = (ref as React.RefObject<WebView | null>) ?? internalRef;
 
-    // ── Timeout management ──────────────────────────────────────────────────
-
-    const startLoadTimeout = useCallback(() => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        setIsLoading(false);
-        setHasError(true);
-        setErrorDescription(
-          `The page took too long to load (>${appConfig.loadTimeoutMs / 1000}s). Please check your connection.`,
-        );
-      }, appConfig.loadTimeoutMs);
-    }, []);
-
-    const cancelLoadTimeout = useCallback(() => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-    }, []);
-
     // ── Event handlers ──────────────────────────────────────────────────────
 
-    const handleLoadStart = useCallback(() => {
-      setIsLoading(true);
-      setHasError(false);
-      startLoadTimeout();
-    }, [startLoadTimeout]);
-
     const handleLoadEnd = useCallback(() => {
-      cancelLoadTimeout();
-      setIsLoading(false);
       setRefreshing(false);
-    }, [cancelLoadTimeout]);
-
-    const handleError = useCallback(
-      (syntheticEvent: { nativeEvent: { description?: string } }) => {
-        cancelLoadTimeout();
-        setIsLoading(false);
-        setHasError(true);
-        setErrorDescription(syntheticEvent.nativeEvent.description);
-      },
-      [cancelLoadTimeout],
-    );
-
-    const handleHttpError = useCallback(
-      (syntheticEvent: { nativeEvent: { description?: string; statusCode?: number } }) => {
-        const { statusCode, description } = syntheticEvent.nativeEvent;
-        if (statusCode && statusCode >= 500) {
-          cancelLoadTimeout();
-          setIsLoading(false);
-          setHasError(true);
-          setErrorDescription(description ?? `Server error (HTTP ${statusCode})`);
-        }
-      },
-      [cancelLoadTimeout],
-    );
-
-    const handleProgress = useCallback(() => {
-      // Progress events confirm the page is actively loading: reset timeout window
-      startLoadTimeout();
-    }, [startLoadTimeout]);
+    }, []);
 
     const handleNavigationStateChange = useCallback(
       (navState: WebViewNavigation) => {
@@ -179,6 +115,15 @@ const WebViewContainer = React.forwardRef<WebView | null, WebViewContainerProps>
         }
 
         // Open external URLs in the system browser
+        if (__DEV__) {
+          console.warn(
+            '[WebView Guard] Blocked & opening in Safari:',
+            url,
+            '| isTopFrame:',
+            request.isTopFrame,
+          );
+        }
+
         Linking.openURL(url).catch(() => {
           if (__DEV__) console.warn('[WebView] Cannot open external URL:', url);
         });
@@ -191,23 +136,10 @@ const WebViewContainer = React.forwardRef<WebView | null, WebViewContainerProps>
 
     const handleRefresh = useCallback(() => {
       setRefreshing(true);
-      setHasError(false);
-      webViewRef.current?.reload();
-    }, [webViewRef]);
-
-    // ── Retry ───────────────────────────────────────────────────────────────
-
-    const handleRetry = useCallback(() => {
-      setHasError(false);
-      setIsLoading(true);
       webViewRef.current?.reload();
     }, [webViewRef]);
 
     // ─────────────────────────────────────────────────────────────────────────
-
-    if (hasError) {
-      return <ErrorScreen errorDescription={errorDescription} onRetry={handleRetry} />;
-    }
 
     return (
       <View style={styles.container}>
@@ -227,20 +159,12 @@ const WebViewContainer = React.forwardRef<WebView | null, WebViewContainerProps>
             onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
             onNavigationStateChange={handleNavigationStateChange}
             // ── Load events ─────────────────────────────────────────────
-            onLoadStart={handleLoadStart}
             onLoadEnd={handleLoadEnd}
-            onError={handleError}
-            onHttpError={handleHttpError}
-            onLoadProgress={handleProgress}
             // ── Security ─────────────────────────────────────────────────
             allowFileAccess={false}
             allowUniversalAccessFromFileURLs={false}
             allowFileAccessFromFileURLs={false}
-            originWhitelist={appConfig.allowedDomains.map((d) => `https://${d}`).concat(
-              appConfig.features.httpsOnly
-                ? []
-                : appConfig.allowedDomains.map((d) => `http://${d}`),
-            )}
+            originWhitelist={['*']}
             // ── Performance ──────────────────────────────────────────────
             cacheEnabled
             domStorageEnabled
@@ -259,7 +183,6 @@ const WebViewContainer = React.forwardRef<WebView | null, WebViewContainerProps>
             })}
           />
         </ScrollView>
-        {isLoading && <LoadingIndicator />}
       </View>
     );
   },

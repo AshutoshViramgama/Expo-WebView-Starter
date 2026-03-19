@@ -15,18 +15,17 @@ import WebView from 'react-native-webview';
 import * as Linking from 'expo-linking';
 
 import appConfig from '../config/app.config';
-import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useNavigationState } from '../hooks/useNavigationState';
 import { useBackHandler } from '../hooks/useBackHandler';
 import { useTheme } from '../hooks/useTheme';
 import { handleDeepLink } from '../utils/deepLink';
 
 import WebViewContainer from '../components/WebViewContainer';
-import OfflineScreen from '../components/OfflineScreen';
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
-  const { isConnected, isLoading: isNetworkLoading } = useNetworkStatus();
+  // Ensure we wait for initialUrl to be populated from async storage before mounting WebView,
+  // to avoid loading baseUrl then immediately reloading the stored url.
   const { initialUrl, isLoadingUrl, saveUrl } = useNavigationState();
   const [canGoBack, setCanGoBack] = useState(false);
 
@@ -60,25 +59,10 @@ const HomeScreen: React.FC = () => {
     });
   }, [webViewRef]);
 
-  // ── Retry after offline recovery ─────────────────────────────────────────
-  const handleRetryConnection = useCallback(() => {
-    // useNetworkStatus will re-render when connectivity is restored;
-    // pressing retry here just causes a re-render that shows the WebView again.
-  }, []);
-
   // ── Render ───────────────────────────────────────────────────────────────
 
-  // Wait until both network status and stored URL are resolved
-  if (isNetworkLoading || isLoadingUrl) {
+  if (isLoadingUrl) {
     return <View style={[styles.container, { backgroundColor: theme.colors.background }]} />;
-  }
-
-  if (!isConnected) {
-    return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <OfflineScreen onRetry={handleRetryConnection} />
-      </View>
-    );
   }
 
   return (

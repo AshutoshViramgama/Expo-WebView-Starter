@@ -28,10 +28,7 @@ git clone <repo>  →  change URL in .env  →  npx expo start
 | 🔒 **Domain Whitelist** | Blocks navigation to non-whitelisted domains; opens externally |
 | 🔐 **HTTPS Enforcement** | Optionally upgrades all `http://` to `https://` |
 | 💾 **Persistent State** | Remembers last-visited URL via AsyncStorage |
-| 📡 **Offline Screen** | Full-screen fallback when device has no internet |
-| ⚠️ **Error Screen** | Shows retry UI on load failure or timeout |
 | 🔄 **Pull-to-Refresh** | Drag-to-reload gesture (configurable) |
-| ⏱ **Load Timeout** | Auto-shows error after configurable timeout |
 | 🤖 **Android Back Button** | Goes back in WebView history or exits app |
 | 🔗 **External Links** | Opens outside-domain URLs in system browser |
 | 🔔 **Deep Linking** | Opens `webviewapp://path` → loads matching web path |
@@ -59,16 +56,12 @@ webview-app/
 │   └── app.config.ts        # ⭐ Central config: URL, domains, flags
 │
 ├── hooks/
-│   ├── useNetworkStatus.ts  # Live connectivity monitoring
 │   ├── useNavigationState.ts # Persistent last-URL with debounced save
 │   ├── useBackHandler.ts    # Android hardware back button
 │   └── useTheme.ts          # System dark/light mode tokens
 │
 ├── components/
 │   ├── WebViewContainer.tsx # Core WebView with all features
-│   ├── LoadingIndicator.tsx # Full-screen spinner
-│   ├── OfflineScreen.tsx    # No-internet fallback
-│   └── ErrorScreen.tsx      # Load-failure fallback with retry
 │
 ├── screens/
 │   └── HomeScreen.tsx       # Orchestrates hooks + components
@@ -236,7 +229,6 @@ features: {
 ### Timeouts & Cache
 
 ```typescript
-loadTimeoutMs: 15_000,          // Show error after 15 seconds
 cacheMode: 'LOAD_DEFAULT',      // Android cache mode (production)
 ```
 

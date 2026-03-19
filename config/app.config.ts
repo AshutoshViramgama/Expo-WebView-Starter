@@ -46,8 +46,6 @@ export interface AppConfig {
   environment: Environment;
   /** Feature toggles */
   features: FeatureFlags;
-  /** Milliseconds before showing an error instead of a loading spinner */
-  loadTimeoutMs: number;
   /** WebView cache mode (Android). Maps to Android WebSettings.CacheMode */
   cacheMode: 'LOAD_DEFAULT' | 'LOAD_CACHE_ONLY' | 'LOAD_CACHE_ELSE_NETWORK' | 'LOAD_NO_CACHE';
   /** Deep-link URL scheme registered in app.json > scheme */
@@ -90,8 +88,6 @@ const appConfig: AppConfig = {
     enableDarkMode: true,
     showHeader: false,        // set true to show a header bar with app name
   },
-
-  loadTimeoutMs: 15_000,
 
   cacheMode: ENVIRONMENT === 'production' ? 'LOAD_DEFAULT' : 'LOAD_NO_CACHE',
 

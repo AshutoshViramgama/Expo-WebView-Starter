@@ -344,16 +344,6 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## 📋 Roadmap
-
-- [ ] Version check / update prompt
-- [ ] Biometric authentication gate before loading WebView
-- [ ] Local notifications support
-- [ ] Multiple URL tabs
-- [ ] Custom header with progress bar
-
----
-
 <div align="center">
   Made with ❤️ for the React Native community
   <br/>

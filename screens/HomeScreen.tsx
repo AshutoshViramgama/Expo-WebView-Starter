@@ -11,6 +11,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 import * as Linking from 'expo-linking';
 
@@ -24,6 +25,10 @@ import WebViewContainer from '../components/WebViewContainer';
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
+  
+  // Track the actual webpage background color to blend the notch and footer naturally
+  const [safeAreaColor, setSafeAreaColor] = useState<string>(theme.colors.background);
+  
   // Ensure we wait for initialUrl to be populated from async storage before mounting WebView,
   // to avoid loading baseUrl then immediately reloading the stored url.
   const { initialUrl, isLoadingUrl, saveUrl } = useNavigationState();
@@ -66,14 +71,17 @@ const HomeScreen: React.FC = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <WebViewContainer
-        ref={webViewRef}
-        initialUrl={initialUrl}
-        onUrlChange={saveUrl}
-        onCanGoBackChange={setCanGoBack}
-      />
-    </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: safeAreaColor }]} edges={['top', 'bottom', 'left', 'right']}>
+      <View style={{ flex: 1, backgroundColor: safeAreaColor }}>
+        <WebViewContainer
+          ref={webViewRef}
+          initialUrl={initialUrl}
+          onUrlChange={saveUrl}
+          onCanGoBackChange={setCanGoBack}
+          onThemeColorChange={setSafeAreaColor}
+        />
+      </View>
+    </SafeAreaView>
   );
 };
 

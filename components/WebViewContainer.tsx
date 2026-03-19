@@ -45,12 +45,14 @@ export interface WebViewContainerProps {
   onUrlChange?: (url: string) => void;
   /** Notifies parent of whether the WebView can go back */
   onCanGoBackChange?: (canGoBack: boolean) => void;
+  /** Emits dynamically detected background/theme color from the webpage */
+  onThemeColorChange?: (color: string) => void;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const WebViewContainer = React.forwardRef<WebView | null, WebViewContainerProps>(
-  ({ initialUrl, onUrlChange, onCanGoBackChange }, ref) => {
+  ({ initialUrl, onUrlChange, onCanGoBackChange, onThemeColorChange }, ref) => {
     const [refreshing, setRefreshing] = useState(false);
     const [currentUrl, setCurrentUrl] = useState(initialUrl);
 
@@ -145,6 +147,7 @@ const WebViewContainer = React.forwardRef<WebView | null, WebViewContainerProps>
       <View style={styles.container}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
+          contentInsetAdjustmentBehavior="never"
           refreshControl={
             appConfig.features.enablePullToRefresh ? (
               <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
@@ -155,6 +158,37 @@ const WebViewContainer = React.forwardRef<WebView | null, WebViewContainerProps>
             ref={ref ?? internalRef}
             style={styles.webView}
             source={{ uri: currentUrl }}
+            // ── Dynamic Color Tracking ────────────────────────────────
+            injectedJavaScript={`
+              (function() {
+                function sendColor() {
+                  let color = null;
+                  var metaTheme = document.querySelector('meta[name="theme-color"]');
+                  if (metaTheme) {
+                    color = metaTheme.getAttribute('content');
+                  } else {
+                    color = window.getComputedStyle(document.body).backgroundColor;
+                  }
+                  if (color && color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent') {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'themeColor', color: color }));
+                  }
+                }
+                sendColor();
+                setTimeout(sendColor, 500);
+                setTimeout(sendColor, 1500);
+              })();
+              true;
+            `}
+            onMessage={(event) => {
+              try {
+                const data = JSON.parse(event.nativeEvent.data);
+                if (data.type === 'themeColor' && data.color && onThemeColorChange) {
+                  onThemeColorChange(data.color);
+                }
+              } catch (e) {
+                // Ignore parsing errors from other scripts
+              }
+            }}
             // ── Navigation ──────────────────────────────────────────────
             onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
             onNavigationStateChange={handleNavigationStateChange}

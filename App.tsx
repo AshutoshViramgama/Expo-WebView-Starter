@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 import { useTheme } from './hooks/useTheme';
@@ -18,10 +18,10 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={[styles.root, { backgroundColor: theme.colors.background }]}>
-        <StatusBar style={theme.isDark ? 'light' : 'dark'} />
+      <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
+        <StatusBar style={theme.isDark ? 'light' : 'dark'} translucent={true} />
         <HomeScreen />
-      </SafeAreaView>
+      </View>
     </SafeAreaProvider>
   );
 }

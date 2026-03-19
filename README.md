@@ -1,13 +1,12 @@
 <div align="center">
 
-# 📱 WebView App Starter
+# 📱 Expo WebView Starter
 
 **A production-ready, plug-and-play Expo + React Native template that wraps any URL in a fully native mobile app.**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Expo SDK](https://img.shields.io/badge/Expo-SDK%2055-000020?logo=expo)](https://expo.dev/)
 [![React Native](https://img.shields.io/badge/React%20Native-0.83-61DAFB?logo=react)](https://reactnative.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
@@ -31,7 +30,7 @@ git clone <repo>  →  change URL in .env  →  npx expo start
 | 🔄 **Pull-to-Refresh** | Drag-to-reload gesture (configurable) |
 | 🤖 **Android Back Button** | Goes back in WebView history or exits app |
 | 🔗 **External Links** | Opens outside-domain URLs in system browser |
-| 🔔 **Deep Linking** | Opens `webviewapp://path` → loads matching web path |
+| 🔔 **Deep Linking** | Opens `expowebviewstarter://path` → loads matching web path |
 | 🌙 **Dark Mode** | Follows system light/dark mode automatically |
 | 🎛 **Feature Flags** | Toggle every feature in one config file |
 | 📊 **Analytics Stub** | Drop-in placeholder for Firebase/Mixpanel |
@@ -42,7 +41,7 @@ git clone <repo>  →  change URL in .env  →  npx expo start
 ## 📁 Project Structure
 
 ```
-webview-app/
+expo-webview-starter/
 ├── App.tsx                  # Root entry point (minimal)
 ├── app.json                 # Expo app config (name, icon, scheme)
 ├── babel.config.js          # Babel: .env support + path aliases
@@ -99,8 +98,8 @@ webview-app/
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/yourusername/webview-app-starter.git
-cd webview-app-starter
+git clone https://github.com/yourusername/expo-webview-starter-starter.git
+cd expo-webview-starter-starter
 npm install
 ```
 
@@ -190,7 +189,7 @@ npx eas build --platform ios --profile production
 
 # Local build (requires Mac + Xcode)
 npx expo prebuild
-cd ios && xcodebuild archive -scheme webviewapp
+cd ios && xcodebuild archive -scheme expowebviewstarter
 ```
 
 #### First-time EAS Setup
@@ -220,7 +219,7 @@ features: {
   enablePullToRefresh: true,    // Drag-to-reload gesture
   httpsOnly: true,              // Force HTTPS for all navigation
   enableAnalytics: false,       // Enable analytics tracking
-  enableDeepLinking: true,      // Handle webviewapp:// deep links
+  enableDeepLinking: true,      // Handle expowebviewstarter:// deep links
   enableDarkMode: true,         // Follow system dark/light mode
   showHeader: false,            // Show branded header bar
 }
@@ -266,10 +265,10 @@ const lightTheme = {
 
 ## 🔗 Deep Linking
 
-The app registers the `webviewapp://` URL scheme. To open a specific path:
+The app registers the `expowebviewstarter://` URL scheme. To open a specific path:
 
 ```
-webviewapp://blog/post?id=123
+expowebviewstarter://blog/post?id=123
 → Opens: https://your-website.com/blog/post?id=123
 ```
 
@@ -355,26 +354,8 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License
-
-Copyright (c) 2026 WebView App Starter
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software.
-```
-
----
-
 <div align="center">
   Made with ❤️ for the React Native community
   <br/>
-  <a href="#-webview-app-starter">↑ Back to top</a>
+  <a href="#-expo-webview-starter-starter">↑ Back to top</a>
 </div>
